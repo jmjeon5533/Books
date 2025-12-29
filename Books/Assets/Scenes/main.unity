@@ -490,7 +490,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speed: 2
   camSpeed: 100
-  handRange: 5
+  handRange: 2
   _holdingBook: {fileID: 0}
   cam: {fileID: 1391550860}
   _holdingBookPos: {fileID: 2105515269}
@@ -896,7 +896,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3909902803311214217, guid: c7d7e559f78ead44685b74ffb905f335, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: -0.464
       objectReference: {fileID: 0}
     - target: {fileID: 3909902803311214217, guid: c7d7e559f78ead44685b74ffb905f335, type: 3}
       propertyPath: m_LocalPosition.y
@@ -904,7 +904,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3909902803311214217, guid: c7d7e559f78ead44685b74ffb905f335, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -4.216
+      value: -2.839
       objectReference: {fileID: 0}
     - target: {fileID: 3909902803311214217, guid: c7d7e559f78ead44685b74ffb905f335, type: 3}
       propertyPath: m_LocalRotation.w
