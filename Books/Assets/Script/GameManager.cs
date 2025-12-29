@@ -14,6 +14,7 @@ namespace Script
         public Transform bookParent;
 
         private Book bookPrefab;
+        private DataManager _dataManager;
 
         public void AddBookcase(Bookcase bookcase)
         {
@@ -24,6 +25,7 @@ namespace Script
         private void Awake()
         {
             Instance = this;
+            _dataManager = GetComponent<DataManager>();
             bookPrefab = Resources.Load<Book>("Prefab/Book");
         }
 
@@ -38,12 +40,14 @@ namespace Script
 
         private void AddBooks(Bookcase bookcase)
         {
-            for (int j = 0; j < bookcase._plates.Count; j++)
+            for (int i = 0; i < bookcase._plates.Count; i++)
             {
-                for (int count = 0; count < 16; count++)
+                for (int count = 0; count < bookcase._plates[i].GetBookSlotCount(); count++)
                 {
-                    var book = Instantiate(bookPrefab,bookParent);
-                    if (!bookcase._plates[j].AddBook(book,count))
+                    var data = _dataManager.GetBookData(i * bookcase._plates.Count + count);
+                    var book = Instantiate(bookPrefab, bookParent);
+                    book.Init(data);
+                    if (!bookcase._plates[i].AddBook(book,count))
                     {
                         print("오류");
                     }

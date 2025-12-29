@@ -180,6 +180,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a5de5bc861347c2bc2304c967f8a722, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  bookDatabase: []
+  path: library_books_game
 --- !u!1 &598262534
 GameObject:
   m_ObjectHideFlags: 0

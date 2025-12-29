@@ -7,7 +7,13 @@ namespace Script
     public class Plate : MonoBehaviour
     {
         public int floor;
+        [SerializeField]
         private BookSlot[] bookSlots;
+
+        public int GetBookSlotCount()
+        {
+            return bookSlots.Length;
+        }
 
         private void Awake()
         {

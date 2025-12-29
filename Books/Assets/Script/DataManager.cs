@@ -8,18 +8,22 @@ namespace Script
     [System.Serializable]
     public class BookData
     {
-        public float classNumber;
+        [Tooltip("제목")] public string title;
+        [Tooltip("분류기호")] public float classNumber;
         
-        public string authorMark;
-        public int bookMark;
-        public string workMark;
+        [Tooltip("저자기호")] public string authorMark;
+        [Tooltip("도서기호")] public int bookMark;
+        [Tooltip("저작기호")] public string workMark;
         
-        public int volumeMark;
-        public int copyMark;
+        [Tooltip("권호기호")] public int volumeMark;
+        [Tooltip("복본기호")] public int copyMark;
     }
     public class DataManager : MonoBehaviour
     {
+        [SerializeField]
         private List<BookData> bookDatabase = new();
+
+        public string path = "library_books";
         private void Awake()
         {
             LoadBookData();
@@ -27,7 +31,7 @@ namespace Script
 
         private void LoadBookData()
         {
-            TextAsset csvFile = Resources.Load<TextAsset>("library_books");
+            TextAsset csvFile = Resources.Load<TextAsset>(path);
             if (csvFile == null)
             {
                 Debug.Log("CSV를 찾을 수 없음");
@@ -46,7 +50,8 @@ namespace Script
                         bookMark = int.Parse(values[2]),
                         workMark = values[3],
                         volumeMark = int.Parse(values[4]),
-                        copyMark = int.Parse(values[5])
+                        copyMark = int.Parse(values[5]),
+                        title = values[6]
                     };
                     bookDatabase.Add(bookNum);
                 }
@@ -77,6 +82,11 @@ namespace Script
         public BookData GetRandomBookData()  // BookNumberCSV → BookNumber
         {
             return bookDatabase[Random.Range(0, bookDatabase.Count)];
+        }
+
+        public BookData GetBookData(int index)
+        {
+            return bookDatabase[index];
         }
     }
 }
