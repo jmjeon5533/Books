@@ -82,7 +82,6 @@ namespace Script
                 if (Input.GetMouseButtonDown(0) && _holdingBook == null && slot.IsOccupied)
                 {
                     _holdingBook = slot.TakeBook();
-                    Debug.Log(_holdingBook.name);
                 }
                 else if (Input.GetMouseButtonDown(1) && _holdingBook != null && slot.AddBook(_holdingBook))
                 {

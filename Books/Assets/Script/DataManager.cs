@@ -8,6 +8,7 @@ namespace Script
     [System.Serializable]
     public class BookData
     {
+        [Tooltip("ID")] public int ID;
         [Tooltip("제목")] public string title;
         [Tooltip("분류기호")] public float classNumber;
         
@@ -43,15 +44,17 @@ namespace Script
                 string[] values = ParseCSVLine(lines[i]);
                 if (values.Length >= 6)
                 {
+                    int index = 0;
                     BookData bookNum = new BookData()  // class 인스턴스 생성
                     {
-                        classNumber = float.Parse(values[0]),
-                        authorMark = values[1],
-                        bookMark = int.Parse(values[2]),
-                        workMark = values[3],
-                        volumeMark = int.Parse(values[4]),
-                        copyMark = int.Parse(values[5]),
-                        title = values[6]
+                        ID = int.Parse(values[index++]),
+                        classNumber = float.Parse(values[index++]),
+                        authorMark = values[index++],
+                        bookMark = int.Parse(values[index++]),
+                        workMark = values[index++],
+                        volumeMark = int.Parse(values[index++]),
+                        copyMark = int.Parse(values[index++]),
+                        title = values[index++]
                     };
                     bookDatabase.Add(bookNum);
                 }
