@@ -1,90 +1,93 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
-using Random = UnityEngine.Random;
+using ExcelDataReader;
 
 namespace Script
 {
+    [AttributeUsage(AttributeTargets.Field, AllowMultiple = false)]
+    public class AliasAttribute : Attribute
+    {
+        public string Alias { get; }
+        public AliasAttribute(string alias) => Alias = alias;
+    }
+
     [System.Serializable]
     public class BookData
     {
-        [Tooltip("ID")] public int ID;
-        [Tooltip("제목")] public string title;
-        [Tooltip("분류기호")] public float classNumber;
-        
-        [Tooltip("저자기호")] public string authorMark;
-        [Tooltip("도서기호")] public int bookMark;
-        [Tooltip("저작기호")] public string workMark;
-        
-        [Tooltip("권호기호")] public int volumeMark;
-        [Tooltip("복본기호")] public int copyMark;
+        [Alias("Index")] public int ID;
+        [Alias("title")] public string title;
+        [Alias("classNumber")] public float classNumber;
+
+        [Alias("authorMark")] public string authorMark;
+        [Alias("bookMark")] public int bookMark;
+        [Alias("workMark")] public string workMark;
+
+        [Alias("volumeMark")] public int volumeMark;
+        [Alias("copyMark")] public int copyMark;
     }
+    [System.Serializable]
+    public class StageData
+    {
+        [Alias("Index")] public int ID;
+        [Alias("BookID")] public int BookID;
+    }
+
     public class DataManager : MonoBehaviour
     {
-        [SerializeField]
-        private List<BookData> bookDatabase = new();
+        [SerializeField] private List<BookData> bookDatabase = new();
 
-        public string path = "library_books";
+        private string _path = "Assets/library_books.xlsm";
+
         private void Awake()
         {
             LoadBookData();
         }
 
+        //BookData뿐만 아닌 StageData, 다른 클래스 타입도 파싱하고 저장할 수 있게 유동성 강화 필요
         private void LoadBookData()
         {
-            TextAsset csvFile = Resources.Load<TextAsset>(path);
-            if (csvFile == null)
-            {
-                Debug.Log("CSV를 찾을 수 없음");
-                return;
-            }
-            string[] lines = csvFile.text.Split('\n');
-            for (int i = 1; i < lines.Length; i++)
-            {
-                string[] values = ParseCSVLine(lines[i]);
-                if (values.Length >= 6)
-                {
-                    int index = 0;
-                    BookData bookNum = new BookData()  // class 인스턴스 생성
-                    {
-                        ID = int.Parse(values[index++]),
-                        classNumber = float.Parse(values[index++]),
-                        authorMark = values[index++],
-                        bookMark = int.Parse(values[index++]),
-                        workMark = values[index++],
-                        volumeMark = int.Parse(values[index++]),
-                        copyMark = int.Parse(values[index++]),
-                        title = values[index++]
-                    };
-                    bookDatabase.Add(bookNum);
-                }
-            }
-        }
-        private string[] ParseCSVLine(string line)
-        {
-            List<string> result = new();
-            bool inQuotes = false;
-            string field = "";
+            using var stream = File.Open(_path, FileMode.Open, FileAccess.Read, FileShare.Read);
+            using var reader = ExcelReaderFactory.CreateReader(stream);
+            var result = reader.AsDataSet();
 
-            for (int i = 0; i < line.Length; i++)
-            {
-                char c = line[i];
-                if (c == '"') inQuotes = !inQuotes;
-                else if (c == ',' && !inQuotes)
-                {
-                    result.Add(field.Trim('"'));
-                    field = "";
-                }
-                else field += c;
-            }
-            result.Add(field.Trim('"'));
-            return result.ToArray();
-        }
+            List<BookData> tempList = new();
+            var bookTable = result.Tables[0]; // 해당 파일의 0번째 테이블만 있다고 가정
 
-        // GameManager에서 사용
-        public BookData GetRandomBookData()  // BookNumberCSV → BookNumber
-        {
-            return bookDatabase[Random.Range(0, bookDatabase.Count)];
+            for(int i = 1; i <bookTable.Rows.Count; i++)
+            {
+                var dataRow = bookTable.Rows[i]; // 두번째 가로줄부터 시작하는 데이터 한 줄
+                if (string.IsNullOrEmpty(dataRow[0].ToString())) // 첫번째 칸이 비어있으면 없는 데이터라서 Break
+                    break;
+
+                var newData = new BookData();
+
+                // BookData의 모든 필드 가져오기
+                foreach (var field in typeof(BookData).GetFields(BindingFlags.Public | BindingFlags.Instance))
+                {
+                    var attr = field.GetCustomAttribute<AliasAttribute>();
+                    if (attr == null) continue; // Attribute 없으면 건너뛰기
+
+                    var rootRow = bookTable.Rows[0];
+                    var alias = attr.Alias;
+                    var findIdx = rootRow.FindAliasIdx(alias,bookTable.Columns.Count);
+                    if (findIdx == -1)
+                        continue;
+
+                    var data = dataRow[findIdx].ToString(); //실제 Alias와 같은 테이블의 데이터 값 하나
+
+                    //Attribute가 있는 각각의 field의 Type
+                    Type type = field.FieldType;
+                    //(type)data 는 컴파일 시 타입이 확정되어야 하기에 사용 불가
+                    field.SetValue(newData, Convert.ChangeType(data, type)); //동적 타입 형변환 함수 사용
+                }
+
+                tempList.Add(newData);
+            }
+
+            bookDatabase = tempList;
         }
 
         public BookData GetBookData(int index)
