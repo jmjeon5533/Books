@@ -100,3 +100,7 @@ InitTestScene*.unity*
 
 # Table.bytes 무시
 Assets/Resources/Table
+
+# 임시 엑셀 파일 무시
+~$*.xlsm*
+~$*.xlsm.meta*
